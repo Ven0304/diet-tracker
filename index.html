@@ -31,9 +31,8 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{background:var(--bg)}
 body{margin:0;background:var(--bg);color:var(--label);font-family:var(--font);font-size:17px;line-height:1.3;letter-spacing:-.41px;
-  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-text-size-adjust:100%;text-size-adjust:100%;
-  transition:background-color .45s var(--spring)}
-body.sheet-open{background:#000;overflow:hidden}
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body.sheet-open{overflow:hidden}
 button{font:inherit;color:inherit;letter-spacing:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;text-align:inherit}
 input{font:inherit;color:inherit;letter-spacing:inherit}
 .num{font-family:var(--rounded);font-variant-numeric:tabular-nums}
@@ -42,7 +41,8 @@ input{font:inherit;color:inherit;letter-spacing:inherit}
 .app{max-width:560px;margin:0 auto;min-height:100vh;background:var(--bg);
   padding:calc(env(safe-area-inset-top) + 4px) 16px calc(env(safe-area-inset-bottom) + 100px);
   transform-origin:50% 0;transition:transform .5s var(--spring)}
-body.sheet-open .app{transform:translateY(calc(env(safe-area-inset-top) + 10px)) scale(.92)}
+/* 弹出面板时背后的页面轻轻往后退：背景和页面同色，不会露出边框 */
+body.sheet-open .app{transform:scale(.96)}
 .view{display:none}
 .view.active{display:block;animation:fade .2s ease}
 @keyframes fade{from{opacity:0}to{opacity:1}}
@@ -1017,12 +1017,11 @@ function deletePlanItem(){
   }
 }
 
-// 弹出面板时，背后的页面像 iOS 一样缩小、圆角、压暗
+// 弹出面板时，背后的页面以屏幕中心为基点轻轻缩小、压暗
 function presentSheet(){
-  const app = $('.app'), y = window.scrollY;
+  const app = $('.app');
   clearTimeout(sheetTimer);
-  app.style.transformOrigin = `50% ${y}px`;
-  app.style.clipPath = `inset(${y}px 0 0 0 round 12px)`;
+  app.style.transformOrigin = `50% ${window.scrollY + window.innerHeight / 2}px`;
   document.body.classList.add('sheet-open');
   $('#backdrop').classList.add('open');
   $('#sheet').classList.add('open');
@@ -1034,7 +1033,7 @@ function closeSheet(){
   if (document.activeElement) document.activeElement.blur();
   sheetCtx = null;
   clearTimeout(sheetTimer);
-  sheetTimer = setTimeout(() => { const app = $('.app'); app.style.clipPath = ''; app.style.transformOrigin = ''; }, 520);
+  sheetTimer = setTimeout(() => { $('.app').style.transformOrigin = ''; }, 520);
 }
 function readForm(){
   const on = document.querySelector('#f-type .on');
